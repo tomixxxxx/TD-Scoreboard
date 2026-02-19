@@ -50,7 +50,7 @@ const CustomTooltip = ({ active, payload, label, type }) => {
     return null;
 };
 
-const Tab2_StoreMonthly = ({ data, rawData, year, selectedMonth }) => {
+const Tab2_StoreMonthly = ({ data, rawData, year, selectedMonth, storeOrder = [] }) => {
     const [sortConfigs, setSortConfigs] = useState({});
     const [selectedStores, setSelectedStores] = useState([]);
 
@@ -59,7 +59,7 @@ const Tab2_StoreMonthly = ({ data, rawData, year, selectedMonth }) => {
     // 月次推移データ（年間rawDataから）- 固定順序
     // データがない場合でも空配列を返してフックの順序を守る
     const { chartData: monthlyChartData, stores } = rawData
-        ? getMonthlyTotalsByStore(rawData, year)
+        ? getMonthlyTotalsByStore(rawData, year, storeOrder)
         : { chartData: [], stores: [] };
 
     // selectedStoresの初期化
@@ -75,7 +75,7 @@ const Tab2_StoreMonthly = ({ data, rawData, year, selectedMonth }) => {
 
     // 店舗グループ（フィルタ済みデータ）- 固定順序でソート
     const rawStoreGroups = groupByStore(data);
-    const sortedStoreCodes = sortStoresByOrder(Object.keys(rawStoreGroups));
+    const sortedStoreCodes = sortStoresByOrder(Object.keys(rawStoreGroups), storeOrder);
 
     // 店舗別総売上（ドーナツグラフ用）- 固定順序
     const storeTotals = sortedStoreCodes.map(storeCode => {
@@ -90,7 +90,7 @@ const Tab2_StoreMonthly = ({ data, rawData, year, selectedMonth }) => {
             const newSelection = prev.includes(store)
                 ? prev.filter(s => s !== store)
                 : [...prev, store];
-            return sortStoresByOrder(newSelection);
+            return sortStoresByOrder(newSelection, storeOrder);
         });
     };
 

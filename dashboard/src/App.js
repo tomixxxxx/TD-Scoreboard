@@ -56,6 +56,7 @@ function App() {
   const [error, setError] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [loadedFileYears, setLoadedFileYears] = useState([]); // [{name, year}]
+  const [storeOrder, setStoreOrder] = useState([]); // 店舗表示順序
   const [showYearEdit, setShowYearEdit] = useState(false); // 年度編集ダイアログ
   // 確認ダイアログ用：ファイル選択待機中のファイル配列
   const [pendingFiles, setPendingFiles] = useState(null);
@@ -101,6 +102,10 @@ function App() {
         setLoadedFileYears(
           orderedFiles.map((f, i) => ({ name: f.name, year: years[i] }))
         );
+        // 店舗順序を保存
+        if (result.storeOrder && result.storeOrder.length > 0) {
+          setStoreOrder(result.storeOrder);
+        }
         const availYears = getAvailableYears(result.data);
         if (availYears.length > 0) {
           setSelectedYear(availYears[0]);
@@ -128,6 +133,7 @@ function App() {
     setIsDataLoaded(false);
     setError(null);
     setLoadedFileYears([]);
+    setStoreOrder([]);
     setActiveTab('main');
   };
 
@@ -207,8 +213,8 @@ function App() {
   };
 
   // Charts & Rankings
-  const { chartData: monthlyChartData, stores: monthlyStores } = getMonthlyTotalsByStore(rawData, selectedYear);
-  const storeRankings = getStoreRankings(rawData, selectedYear, selectedMonth); // 年月フィルター適用
+  const { chartData: monthlyChartData, stores: monthlyStores } = getMonthlyTotalsByStore(rawData, selectedYear, storeOrder);
+  const storeRankings = getStoreRankings(rawData, selectedYear, selectedMonth, storeOrder); // 年月フィルター適用
 
   // Dynamic TOP3 (Annual vs Monthly based on selection)
   // filteredData is already filtered by month if selectedMonth is set.
@@ -385,6 +391,7 @@ function App() {
             rawData={rawData}
             year={selectedYear}
             selectedMonth={selectedMonth}
+            storeOrder={storeOrder}
           />
         )}
 

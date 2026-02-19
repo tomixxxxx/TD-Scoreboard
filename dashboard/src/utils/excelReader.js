@@ -63,6 +63,29 @@ export const readExcelFile = async (input, explicitYear = null) => {
             console.warn('スタッフデータシートが見つかりません');
         }
 
+        // 店舗順序を取得（表シート）
+        const storeOrder = [];
+        const tableSheetName = workbook.SheetNames.find(name => name === '表' || name === '店舗リスト');
+        if (tableSheetName) {
+            const tableSheet = workbook.Sheets[tableSheetName];
+            // ヘッダーなしで取得して自身で解析
+            const tableData = XLSX.utils.sheet_to_json(tableSheet, { header: 1, defval: '' });
+
+            // 2行目以降のA列(index 0)を取得
+            for (let i = 1; i < tableData.length; i++) {
+                const row = tableData[i];
+                if (row && row[0]) {
+                    const storeName = String(row[0]).trim();
+                    if (storeName && storeName !== '店舗リスト') {
+                        storeOrder.push(storeName);
+                    }
+                }
+            }
+            console.log(`店舗順序読み込み成功: ${storeOrder.join(', ')}`);
+        } else {
+            console.warn('表シートが見つかりません');
+        }
+
         // CSV計算シートを読み込む
         const sheetName = 'CSV計算';
         if (!workbook.SheetNames.includes(sheetName)) {
@@ -130,7 +153,7 @@ export const readExcelFile = async (input, explicitYear = null) => {
         });
 
         console.log(`読み込み成功: ${data.length}行のデータ`);
-        return { headers, data, staffMap };
+        return { headers, data, staffMap, storeOrder };
     } catch (error) {
         console.error('Excelファイル読み込みエラー:', error);
         alert(`Excelファイルの読み込みに失敗しました: ${error.message}`);
@@ -165,12 +188,15 @@ export const readMultipleExcelFiles = async (files, fileYears = null) => {
     // staffMapをマージ（後のファイルが優先）
     const mergedStaffMap = validResults.reduce((acc, r) => ({ ...acc, ...r.staffMap }), {});
 
-    // ヘッダーは最初のファイルのものを使用
+    // ヘッダーと店舗順序は最初のファイルのものを使用（またはマージ）
     const headers = validResults[0].headers;
+
+    // 店舗順序: 有効な最初の順序を採用
+    const storeOrder = validResults.find(r => r.storeOrder && r.storeOrder.length > 0)?.storeOrder || [];
 
     const fileNames = files.map(f => f.name);
 
     console.log(`複数ファイル読み込み完了: ${fileNames.join(', ')} / 合計 ${mergedData.length}行`);
 
-    return { headers, data: mergedData, staffMap: mergedStaffMap, fileNames };
+    return { headers, data: mergedData, staffMap: mergedStaffMap, fileNames, storeOrder };
 };

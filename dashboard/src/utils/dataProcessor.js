@@ -6,15 +6,18 @@
  * 店舗の表示順序（固定）
  * この順序でグラフ・テーブルを表示する
  */
-export const STORE_ORDER = ['奈良', '天理', '生駒', 'villa'];
+// STORE_ORDER (固定順序) は廃止されました。動的に取得した順序を使用します。
 
 /**
  * 店舗リストを固定順序でソートする
  */
-export const sortStoresByOrder = (stores) => {
+export const sortStoresByOrder = (stores, storeOrder = []) => {
     return [...stores].sort((a, b) => {
-        const ai = STORE_ORDER.findIndex(s => a.includes(s));
-        const bi = STORE_ORDER.findIndex(s => b.includes(s));
+        // order が空なら単に名前順（または何もしない）
+        if (!storeOrder || storeOrder.length === 0) return a.localeCompare(b);
+
+        const ai = storeOrder.findIndex(s => a.includes(s));
+        const bi = storeOrder.findIndex(s => b.includes(s));
         if (ai === -1 && bi === -1) return a.localeCompare(b);
         if (ai === -1) return 1;
         if (bi === -1) return -1;
@@ -437,7 +440,7 @@ export const getMonthlyTotals = (data, year) => {
  * 店舗別月別売上を取得（積み上げ棒グラフ用）
  * 合計売上ライン・客数も含む
  */
-export const getMonthlyTotalsByStore = (data, year) => {
+export const getMonthlyTotalsByStore = (data, year, storeOrder = []) => {
     if (!data || data.length === 0) return { chartData: [], stores: [] };
 
     const yearData = filterByPeriod(data, year, null);
@@ -472,7 +475,7 @@ export const getMonthlyTotalsByStore = (data, year) => {
         monthMap[month].総客数 += customers;
     });
 
-    const stores = sortStoresByOrder(Array.from(storeSet));
+    const stores = sortStoresByOrder(Array.from(storeSet), storeOrder);
     const chartData = Object.values(monthMap).sort((a, b) => a.month - b.month);
 
     return { chartData, stores };
@@ -481,13 +484,13 @@ export const getMonthlyTotalsByStore = (data, year) => {
 /**
  * 店舗別売上ランキングを取得
  */
-export const getStoreRankings = (data, year, month) => {
+export const getStoreRankings = (data, year, month, storeOrder = []) => {
     if (!data || data.length === 0) return [];
 
     const yearData = filterByPeriod(data, year, month);
     const storeGroups = groupByStore(yearData); // 内部でisValidRowを使用
 
-    const rankings = sortStoresByOrder(Object.keys(storeGroups))
+    const rankings = sortStoresByOrder(Object.keys(storeGroups), storeOrder)
         .map(storeCode => {
             const storeData = storeGroups[storeCode];
             const 総売上 = storeData.reduce((sum, row) => sum + toNumber(row['総売上']), 0);
