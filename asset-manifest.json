@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/TD-Scoreboard/static/css/main.29bb7073.css",
+    "main.js": "/TD-Scoreboard/static/js/main.accd356c.js",
+    "static/js/453.dab362cc.chunk.js": "/TD-Scoreboard/static/js/453.dab362cc.chunk.js",
+    "index.html": "/TD-Scoreboard/index.html",
+    "main.29bb7073.css.map": "/TD-Scoreboard/static/css/main.29bb7073.css.map",
+    "main.accd356c.js.map": "/TD-Scoreboard/static/js/main.accd356c.js.map",
+    "453.dab362cc.chunk.js.map": "/TD-Scoreboard/static/js/453.dab362cc.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.29bb7073.css",
+    "static/js/main.accd356c.js"
+  ]
+}
